@@ -106,3 +106,15 @@ curl -X POST 'http://localhost:6333/collections/chemistry_book/snapshots'
 ```
 
 You can find the snapshot file in Qdrant's snapshot directory.
+
+# Generate a txt file
+
+We start from a txt file containing unformatted raw data. 
+
+Run a Python script to generate a new txt file `vectors.txt`.It is then converted into vectors using the above `paragraph_embed.wasm` utility.
+
+```
+python3 generate_para_vectors.py input.txt vectors.txt
+```
+
+The script uses the `llama.us.gaianet.network` node to summarize and generate summary and QnA pairs based on the source text. You can switch to a different LLM (e.g., GPT-4) by changing the configuration at the top of the Python file.

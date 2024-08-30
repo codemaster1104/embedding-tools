@@ -45,7 +45,8 @@ def agen(source_text, question):
 
 def process_chunk(chunk):
     results = []
-    results.append(f"{summarize(chunk)}")
+    results.append(f"Text: {chunk}")
+    results.append(f"Summary: {summarize(chunk)}")
     
     questions = qgen(chunk).splitlines()
     for q in questions:

@@ -109,12 +109,13 @@ You can find the snapshot file in Qdrant's snapshot directory.
 
 # Generate a txt file
 
-We start from a txt file containing unformatted raw data. 
+We start from a folder containing multiple txt files as payload for each vector.
 
 Run a Python script to generate a new txt file `vectors.txt`.It is then converted into vectors using the above `paragraph_embed.wasm` utility.
 
 ```
-python3 generate_para_vectors.py input.txt vectors.txt
+python3 generate_para_vectors.py input_folder vectors.txt
 ```
+a sample output.txt is given for given input folder
 
 The script uses the `llama.us.gaianet.network` node to summarize and generate summary and QnA pairs based on the source text. You can switch to a different LLM (e.g., GPT-4) by changing the configuration at the top of the Python file.

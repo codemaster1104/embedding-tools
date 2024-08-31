@@ -43,15 +43,19 @@ def agen(source_text, question):
     )
     return chat_completion.choices[0].message.content
 
-def process_chunk(chunk):
-    results = []
-    results.append(f"Text: {chunk}")
-    results.append(f"Summary: {summarize(chunk)}")
+def process_file(file_path):
+    with open(file_path, 'r') as f:
+        content = f.read()
     
-    questions = qgen(chunk).splitlines()
+    results = []
+    results.append(f"File: {os.path.basename(file_path)}")
+    # results.append(f"Text: {content}")
+    results.append(f"Summary: {summarize(content)}")
+    
+    questions = qgen(content).splitlines()
     for q in questions:
         if q.strip():
-            answer = agen(chunk, q)
+            answer = agen(content, q)
             results.append(f"Q: {q}\nA: {answer}")
     
     return "\n".join(results)
@@ -66,46 +70,41 @@ def format_time(seconds):
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python3 script.py input.txt output.txt")
+        print("Usage: python3 generate_para_vectors.py input_folder output.txt")
         sys.exit(1)
 
-    input_file, output_file = sys.argv[1], sys.argv[2]
+    input_folder, output_file = sys.argv[1], sys.argv[2]
 
-    with open(input_file, 'r') as f:
-        content = f.read()
+    if not os.path.isdir(input_folder):
+        print(f"Error: {input_folder} is not a valid directory")
+        sys.exit(1)
 
-    content = remove_empty_lines(content)
+    txt_files = [f for f in os.listdir(input_folder) if f.endswith('.txt')]
+    total_files = len(txt_files)
 
-###################################### adjust chunk size here ######################################
-    chunk_size = 1000
-#####################################################################################################
-
-    chunks = [content[i:i+chunk_size] for i in range(0, len(content), chunk_size)]
-    total_chunks = len(chunks)
-
-    print(f"Total chunks to process: {total_chunks}")
+    print(f"Total files to process: {total_files}")
 
     start_time = time.time()
     with open(output_file, 'w') as f:
-        for i, chunk in enumerate(chunks):
-            chunk_start_time = time.time()
+        for i, txt_file in enumerate(txt_files):
+            file_start_time = time.time()
             
-            processed_chunk = process_chunk(chunk)
-            processed_chunk = remove_empty_lines(processed_chunk)
-            f.write(processed_chunk + "\n\n")
+            file_path = os.path.join(input_folder, txt_file)
+            processed_file = process_file(file_path)
+            processed_file = remove_empty_lines(processed_file)
+            f.write(processed_file + "\n\n")
 
-            chunk_end_time = time.time()
-            chunk_duration = chunk_end_time - chunk_start_time
+            file_end_time = time.time()
+            file_duration = file_end_time - file_start_time
 
-          
             if i == 0:
-                estimated_total_time = chunk_duration * total_chunks
+                estimated_total_time = file_duration * total_files
                 print(f"Estimated total time: {format_time(estimated_total_time)}")
 
             # Update progress
-            chunks_left = total_chunks - (i + 1)
-            estimated_time_left = chunk_duration * chunks_left
-            progress = (i + 1) / total_chunks * 100
+            files_left = total_files - (i + 1)
+            estimated_time_left = file_duration * files_left
+            progress = (i + 1) / total_files * 100
 
             print(f"\rProgress: {progress:.2f}% | Estimated time remaining: {format_time(estimated_time_left)}", end="")
 

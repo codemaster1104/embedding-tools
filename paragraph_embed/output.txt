@@ -1,0 +1,209 @@
+File: in2.txt
+Summary: The text is a comprehensive guide to unit testing in Rust. It covers the following topics:
+1. **Unit Testing Basics**: The guide explains that tests are Rust functions that verify that non-test code is functioning as expected. Test functions typically perform some setup, run the code being tested, and then assert whether the results are what was expected.
+2. **Writing Unit Tests**: The guide shows how to write unit tests in Rust using the `#[test]` attribute. It also explains how to use helper macros such as `assert!`, `assert_eq!`, and `assert_ne!`.
+3. **Testing Functions with Return Types**: The guide explains that in Rust 2018, unit tests can return a `Result<(), String>`, which allows the use of the `?` operator in them.
+4. **Testing Panics**: The guide shows how to check functions that should panic under certain circumstances using the `#[should_panic]` attribute.
+5. **Running Specific Tests**: The guide explains how to run specific tests by specifying the test name with the `cargo test` command.
+6. **Ignoring Tests**: The guide shows how to mark tests as ignored using the `#[ignore]` attribute, and how to run them with the `cargo test -- --ignored` command.
+The guide also includes examples of each topic to illustrate how they work in practice.
+Overall, this is a comprehensive guide to unit testing in Rust that covers all aspects of writing and running unit tests.
+Q: What is the purpose of unit testing in Rust?
+A: The purpose of unit testing in Rust is to verify that the non-test code (i.e., the production code) is functioning as expected. Unit tests are small, isolated pieces of code that test a specific function or module to ensure it behaves correctly.
+In other words, unit testing in Rust helps to:
+1. **Catch bugs early**: By writing unit tests for each piece of code, you can catch errors and bugs before they make their way into production.
+2. **Ensure correctness**: Unit tests help ensure that the code is working as intended by verifying its behavior under various conditions.
+3. **Improve confidence**: When you have a comprehensive set of unit tests, you can be more confident in the quality of your codebase.
+4. **Reduce debugging time**: If something goes wrong in production, having a solid set of unit tests makes it easier to identify and fix the issue.
+In Rust, unit testing is an essential part of the development process, and many developers consider it a best practice to write unit tests for every function or module they create.
+Q: How do you mark a function as a test in Rust?
+A: In Rust, you mark a function as a test by adding the `#[test]` attribute above it. This tells the compiler that this function is a test and should be run when the tests are executed.
+Here's an example:
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn my_test() {
+        // code to test goes here
+    }
+}
+```
+The `#[cfg(test)]` attribute tells the compiler that this module is only compiled when the `test` configuration is active. This is a common pattern in Rust, where you have separate modules for tests and non-tests.
+Note that you can also use other attributes like `#[ignore]` to mark a test as ignored, or `#[should_panic]` to specify that a test should panic under certain conditions.
+Q: What happens when a test fails in Rust?
+A: When a test fails in Rust, the following happens:
+1. The test function panics: When a test function encounters an assertion that fails (e.g., `assert_eq!(a, b)`), it will panic and stop executing.
+2. The error message is printed: The error message includes information about what went wrong, such as the line number where the failure occurred and the expected and actual values.
+3. The test result is reported: Cargo reports that the test failed, along with a summary of the results.
+Here's an example of what happens when a test fails:
+```rust
+#[test]
+fn test_add() {
+    assert_eq!(add(1, 2), 4); // This assertion will fail
+}
+pub fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+```
+When you run `cargo test`, the output might look like this:
+```
+running 1 test
+test tests::test_add ... FAILED
+thread 'tests::test_add' panicked at 'assertion failed: `(left == right)`
+  left: `3`,
+ right: `4`', src/lib.rs:10:8
+note: Run with `RUST_BACKTRACE=1` for a backtrace.
+failures:
+---- tests::test_add stdout ----
+        thread 'tests::test_add' panicked at 'assertion failed: `(left == right)`
+  left: `3`,
+ right: `4`', src/lib.rs:10:8
+note: Run with `RUST_BACKTRACE=1` for a backtrace.
+failures:
+    tests::test_add
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out
+```
+In this example, the test function `test_add` panics when it encounters the failing assertion, and Cargo reports that the test failed with a detailed error message.
+Q: Can tests return values in Rust, and if so, how are they used?
+A: Yes, tests in Rust can return values. In fact, starting from Rust 2018 edition, you can use the `Result` type to indicate whether a test passed or failed.
+Here's an example:
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_example() -> Result<(), String> {
+        // Test code here...
+        assert!(true);
+        Ok(())
+    }
+}
+```
+In this example, the `test_example` function returns a `Result` type that contains either an empty tuple `()` to indicate success or a string error message to indicate failure.
+You can use the `?` operator in your test functions to propagate errors and make them more concise. Here's an updated version of the previous example:
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_example() -> Result<(), String> {
+        assert!(true)?;
+        Ok(())
+    }
+}
+```
+In this case, if `assert!(true)` fails, it will return a string error message, and the `?` operator will propagate that error to the caller.
+You can also use the `Result` type to indicate whether a test passed or failed in a more explicit way:
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_example() -> Result<(), String> {
+        assert!(true);
+        if !assert!(false) {
+            Err("Test failed".to_string())
+        } else {
+            Ok(())
+        }
+    }
+}
+```
+In this example, the `test_example` function returns a `Result` type that contains an empty tuple `()` to indicate success or a string error message "Test failed" to indicate failure.
+Note that you can also use other types instead of `Result<(), String>` to return more specific information about the test result. For example:
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_example() -> Result<i32, String> {
+        assert!(true);
+        Ok(42)
+    }
+}
+```
+In this case, the `test_example` function returns a `Result` type that contains an integer value to indicate success or a string error message to indicate failure.
+Q: How can you check functions that should panic under certain circumstances in Rust?
+A: In Rust, you can check functions that should panic under certain circumstances using the `#[should_panic]` attribute. This attribute accepts an optional parameter `expected =` with the text of the panic message.
+Here's an example:
+```rust
+pub fn divide_non_zero_result(a: u32, b: u32) -> u32 {
+    if b == 0 {
+        panic!("Divide-by-zero error");
+    } else if a < b {
+        panic!("Divide result is zero");
+    }
+    a / b
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_divide() {
+        assert_eq!(divide_non_zero_result(10, 2), 5);
+    }
+    #[test]
+    #[should_panic]
+    fn test_any_panic() {
+        divide_non_zero_result(1, 0);
+    }
+    #[test]
+    #[should_panic(expected = "Divide result is zero")]
+    fn test_specific_panic() {
+        divide_non_zero_result(1, 10);
+    }
+}
+```
+In this example, the `divide_non_zero_result` function will panic under two different circumstances: when `b` is 0 and when `a` is less than `b`. The `test_any_panic` test will check that the function panics without specifying an expected message. The `test_specific_panic` test will check that the function panics with a specific message.
+When you run these tests, you should see output like this:
+```
+$ cargo test
+running 3 tests
+test tests::test_any_panic ... ok
+test tests::test_divide ... ok
+test tests::test_specific_panic ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+```
+Note that the `#[should_panic]` attribute is not a guarantee that the function will panic, but rather a way to test that it does panic under certain circumstances. If you want to ensure that a function panics in a specific way, you can use the `panic!` macro with an error message and then assert that the expected message was printed using the `assert_eq!` macro.
+
+File: input.txt
+Summary: Here is a comprehensive summary of the text:
+The article discusses various strategies for handling errors when iterating over results in Rust. It presents five different approaches to dealing with failed operations, each with its own trade-offs and use cases.
+1. **Ignore failed items with filter_map()**: This approach uses `filter_map()` to call a function that returns an optional value. If the function returns `None`, it is filtered out of the results.
+2. **Collect failed items with map_err() and filter_map()**: This approach uses `map_err()` to save error messages while iterating over results, and then filters out successful operations using `filter_map()`.
+3. **Fail the entire operation with collect()**: This approach collects all results into a vector of `Result` values. If any result is an error, the iteration will terminate.
+4. **Collect all valid values and failures with partition()**: This approach uses `partition()` to separate successful operations from failed ones, returning two vectors: one for each type of result.
+The article also provides examples of how to use these strategies in practice, including:
+* Using `filter_map()` to ignore failed items
+* Using `map_err()` and `filter_map()` to collect error messages while iterating over results
+* Using `collect()` to fail the entire operation if any result is an error
+* Using `partition()` to separate successful operations from failed ones
+Finally, the article notes that when using `partition()`, additional boilerplate code is needed to unwrap the results and extract the values.
+Q: What is the type of the variable "numbers" in the first example?
+A: In the first example, the variable "numbers" is of type `Vec<Result<i32, _>>`. This is because the `map` method returns an iterator over results, and then `collect` collects those results into a vector.
+More specifically, the type of `numbers` is:
+```rust
+Vec<Result<i32, std::num::ParseIntError>>
+```
+This indicates that each element in the vector can be either a successful parse result (`Ok(i32)`) or an error result (`Err(std::num::ParseIntError))`.
+Q: What is the function called that filters out None results from a closure?
+A: The function that filters out `None` results from a closure is called `filter_map()`. It takes a closure as an argument, calls it to get a result (which can be either `Some(T)` or `None`), and then returns the result if it's not `None`, effectively filtering out any `None` values.
+Q: How does map_err() handle errors in the second example?
+A: In the second example, `map_err()` is used in conjunction with `filter_map()`. Here's what happens:
+1. The `map()` function attempts to parse each string into an `i32` using `s.parse::<i32>()`.
+2. If the parsing is successful, it returns a `Result` containing the parsed value.
+3. The `ok()` method is called on this `Result`. This method returns `Some(value)` if the result is `Ok(value)`, and `None` if the result is `Err(error)`.
+4. The `filter_map()` function filters out any `None` values, effectively ignoring them.
+5. If a `None` value is returned (i.e., an error occurred during parsing), the `map_err()` function is called on the original `Result` that contained the error.
+Here's what happens when `map_err()` is called:
+* It takes the error from the original `Result` and passes it to the closure provided as an argument.
+* The closure, in this case, simply pushes the error onto a vector of errors (`errors.push(e)`).
+* The resulting value is then wrapped in a new `Option`, which is returned by `map_err()`.
+So, in summary, when an error occurs during parsing, `map_err()` catches it and passes it to the closure, which saves the error on the side while ignoring the failed item.
+Q: What trait does Result implement to allow collecting into a vector?
+A: Result implements the `FromIterator` trait, which allows it to be collected into a vector. This is what enables the use of the `collect()` method on an iterator of Results to create a vector of Results.
+Q: What method is used to partition the results into two separate vectors?
+A: The `partition` method is used to partition the results into two separate vectors. Specifically, it takes a closure that returns a boolean value and partitions the iterator into two parts: one for which the closure returns `true` (the "ok" values) and another for which the closure returns `false` (the "err" values).
+In this case, the `partition` method is used with the `Result::is_ok` method as the closure, which partitions the iterator into two parts: one containing the `Ok` values and another containing the `Err` values.
+Here's a breakdown of how it works:
+* The `partition` method returns a tuple of two iterators: one for the "ok" values and another for the "err" values.
+* The first element of the tuple is an iterator over the "ok" values, which can be collected into a vector using the `collect` method.
+* The second element of the tuple is an iterator over the "err" values, which can also be collected into a vector using the `collect` method.
+In this example, the `partition` method is used to partition the results of parsing the strings into two separate vectors: one for the numbers that were successfully parsed and another for the errors.
+
